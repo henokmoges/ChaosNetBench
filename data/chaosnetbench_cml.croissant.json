@@ -1,0 +1,183 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "@language": "en",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "sc": "https://schema.org/",
+    "cr": "http://mlcommons.org/croissant/",
+    "dct": "http://purl.org/dc/terms/",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "equivalentProperty": "cr:equivalentProperty",
+    "examples": {
+      "@id": "cr:examples",
+      "@type": "@json"
+    },
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileObject": "cr:fileObject",
+    "fileProperty": "cr:fileProperty",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "samplingRate": "cr:samplingRate",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform",
+    "prov": "http://www.w3.org/ns/prov#"
+  },
+  "@type": "sc:Dataset",
+  "conformsTo": "http://mlcommons.org/croissant/1.1",
+  "name": "ChaosNetBench-CML",
+  "citeAs": "https://huggingface.co/datasets/htmoges/chaosnetbench-cml",
+  "description": "ChaosNetBench-CML is a benchmark dataset and evaluation framework for spatiotemporal forecasting on coupled standard map lattices spanning the full K-parameter range from ordered to hyperchaotic regimes. It is designed to evaluate whether spatial-graph-aware architectures outperform temporal baselines under varying degrees of spatiotemporal coupling, as characterised by the ratio rho = epsilon / K.",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "url": "https://huggingface.co/datasets/htmoges/chaosnetbench-cml",
+  "version": "1.0.0",
+  "datePublished": "2026-05-09",
+  "keywords": [
+    "chaos",
+    "coupled standard map",
+    "spatiotemporal forecasting",
+    "benchmark",
+    "graph neural network",
+    "dynamical systems",
+    "valid prediction time"
+  ],
+  "creator": [
+    {
+      "@type": "Person",
+      "name": "H. T. Moges",
+      "email": "ht.moges@gmail.com"
+    }
+  ],
+
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": "multiseed_aggregated_csv",
+      "name": "multiseed_aggregated.csv",
+      "description": "Three-seed aggregated benchmark results: model, K, rho, N, test_mse_mean, test_mse_std, ar_vpt_mean, ar_vpt_std.",
+      "contentUrl": "https://huggingface.co/datasets/htmoges/chaosnetbench-cml/resolve/main/data/multiseed_aggregated.csv",
+      "encodingFormat": "text/csv",
+      "sha256": "063ded7396ca6cc3c9377e9495f5639ef49de2e33bec632666fbc4366e767c29"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "full_dataset_h5",
+      "name": "chaosnetbench_cml.h5",
+      "description": "Full HDF5 trajectory dataset. Contains all (K, rho, N, IC) trajectory groups with state_wrapped arrays (shape T×2N, columns 0..N-1: q mod 2π, N..2N-1: p), initial_conditions (shape 2N), and per-IC SALI orbit classification diagnostics. Approximately 27.3 GB.",
+      "contentUrl": "https://huggingface.co/datasets/htmoges/chaosnetbench-cml/resolve/main/data/chaosnetbench_cml.h5",
+      "encodingFormat": "application/x-hdf5",
+      "sha256": "d683c595f6a9000d8002a80d89fc045a923f5519ebf28433fefac594f6ccd4f3"
+    }
+  ],
+
+  "recordSet": [
+    {
+      "@type": "cr:RecordSet",
+      "@id": "benchmark_results",
+      "name": "benchmark_results",
+      "description": "3-seed aggregated metrics per (model, K, rho, N) configuration. Degenerate runs have test_mse_mean >= 0.95.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "benchmark_results/model",
+          "name": "model",
+          "description": "Model identifier string (e.g. graph_wavenet, d2stgnn, dlinear, tcn).",
+          "dataType": "sc:Text",
+          "source": {"fileObject": {"@id": "multiseed_aggregated_csv"}, "extract": {"column": "model"}}
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "benchmark_results/K",
+          "name": "K",
+          "description": "Standard Map nonlinearity parameter K in {0.5, 0.97, 2.0, 6.5}.",
+          "dataType": "sc:Float",
+          "source": {"fileObject": {"@id": "multiseed_aggregated_csv"}, "extract": {"column": "K"}}
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "benchmark_results/rho",
+          "name": "rho",
+          "description": "Coupling ratio rho = epsilon / K in {0.05, 0.075, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50}.",
+          "dataType": "sc:Float",
+          "source": {"fileObject": {"@id": "multiseed_aggregated_csv"}, "extract": {"column": "rho"}}
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "benchmark_results/N",
+          "name": "N",
+          "description": "Number of coupled oscillator sites in {8, 16, 32}.",
+          "dataType": "sc:Integer",
+          "source": {"fileObject": {"@id": "multiseed_aggregated_csv"}, "extract": {"column": "N"}}
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "benchmark_results/test_mse_mean",
+          "name": "test_mse_mean",
+          "description": "3-seed mean test-window MSE on wrapped coordinates. Runs with test_mse_mean >= 0.95 are classified as degenerate.",
+          "dataType": "sc:Float",
+          "source": {"fileObject": {"@id": "multiseed_aggregated_csv"}, "extract": {"column": "test_mse_mean"}}
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "benchmark_results/ar_vpt_mean",
+          "name": "ar_vpt_mean",
+          "description": "3-seed mean autoregressive Valid Prediction Time (VPT). VPT is the number of rollout steps until NRMSE > 1.0 (NRMSE normalised by the standard deviation of the true trajectory).",
+          "dataType": "sc:Float",
+          "source": {"fileObject": {"@id": "multiseed_aggregated_csv"}, "extract": {"column": "ar_vpt_mean"}}
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "benchmark_results/ar_vpt_std",
+          "name": "ar_vpt_std",
+          "description": "Across-seed standard deviation of AR VPT.",
+          "dataType": "sc:Float",
+          "source": {"fileObject": {"@id": "multiseed_aggregated_csv"}, "extract": {"column": "ar_vpt_std"}}
+        }
+      ]
+    }
+  ],
+
+  "rai:dataLimitations": "ChaosNetBench-CML covers a single Hamiltonian lattice family based on the Coupled Standard Map. Results may not generalise to dissipative systems, continuous-time chaotic flows (e.g. High-Dimensional Coupled Oscillators), or spatiotemporal PDEs. The benchmark measures autoregressive rollout quality; it does not assess long-time statistical properties (invariant measures, Lyapunov spectra). The IC-based train/test split does not test out-of-distribution generalisation across K or rho values.",
+
+  "rai:dataBiases": "All trajectories are generated synthetically from a deterministic dynamical system with a fixed pseudo-random seed scheme (hash-based per configuration). There is no human annotation, demographic data, or selection bias in the conventional sense. The parameter grid (K, rho, N) was chosen to span known dynamical regime boundaries; denser sampling in the mixed-phase region K~0.97 is intentional and reflects scientific interest rather than inadvertent bias.",
+
+  "rai:personalSensitiveInformation": "None. The dataset contains only numerically simulated trajectory data from a mathematical dynamical system. No human subjects, personal information, or sensitive attributes are present.",
+
+  "rai:dataUseCases": "Intended uses: (1) Benchmarking spatiotemporal forecasting models under controlled chaos. (2) Evaluating whether graph-topology-aware architectures improve over temporal-only baselines in coupled chaotic systems. (3) Studying model behaviour as a function of the chaos parameter K and coupling ratio rho. Not recommended for: training ML models for real physical prediction tasks without further validation; use as a general time-series benchmark where the chaotic structure is not relevant.",
+
+  "rai:dataSocialImpact": "Positive: provides a reproducible, physics-grounded benchmark that enables fair comparison of ML forecasting models. Facilitates scientific transparency. Risks: minimal, since the data is synthetic and the subject matter (discrete dynamical systems) has no direct adverse societal application. No known misuse vectors.",
+
+  "rai:hasSyntheticData": true,
+
+  "prov:wasDerivedFrom": "Coupled Standard Map (Chirikov-Taylor map extended to N sites with nearest-neighbour coupling). References: Chirikov (1979), Physica Reports 52(5), 263–379; Kantz & Grassberger (1988). No external dataset is used as a source.",
+
+  "prov:wasGeneratedBy": {
+    "@type": "prov:Activity",
+    "prov:label": "Trajectory generation via chaosnetbench Python package",
+    "prov:description": "Each trajectory is generated by iterating the symplectic map for 1000 transient steps (discarded) followed by 10000 recorded steps. Initial conditions are drawn uniformly in [0, 2pi) x (-pi, pi) per site with hash based per-configuration seeds (base_seed=42). SALI orbit classification is computed using 1000 tangent map iterations with early termination at SALI < 1e-8. The code is publicly available at https://github.com/htmoges/ChaosNetBench."
+  }
+}

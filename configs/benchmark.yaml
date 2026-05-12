@@ -1,0 +1,195 @@
+# ChaosNetBench — Benchmark Configuration
+# All hyperparameters and sweep settings in one place.
+
+# ─────────────────────────────────────────────────────────
+# Dataset / System parameters
+# ─────────────────────────────────────────────────────────
+dataset:
+  # Kick strength K (local chaos driver; four regime anchors from near-integrable to extended chaos)
+  K_values: [0.5, 0.97, 2.0, 6.5]
+
+  # Coupling-to-chaos ratio ρ = ε/K
+  rho_values: [0.05, 0.075, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50]
+
+  # Lattice sizes
+  N_values: [8, 16, 32]
+
+  # Initial conditions per (K, ρ, N) combination
+  n_ics: 100
+
+  # Time-steps per trajectory recorded (full); discard first 1000 as transient
+  # Mini subset bundled in data/chaosnetbench_cml_mini.h5 for local smoke testing
+  n_steps: 10000
+  n_transient: 1000
+
+  # Sequence/prediction lengths for sliding-window training
+  seq_len: 48
+  pred_len: 12
+
+  # Default output filename
+  filename: chaosnetbench_cml.h5
+
+  # Mini (quick-test) configuration
+  mini:
+    K_values: [0.5, 2.0]
+    rho_values: [0.10, 0.30]
+    N_values: [8]
+    n_ics: 6
+    filename: chaosnetbench_cml_mini.h5
+
+# ─────────────────────────────────────────────────────────
+# Training protocol (frozen after pilot tuning)
+# ─────────────────────────────────────────────────────────
+training:
+  epochs: 50
+  batch_size: 32
+  milestones: [20, 35, 45]
+  gamma: 0.5            # LR decay factor at each milestone
+  patience: 10          # Early stopping patience (val MSE)
+  grad_clip_norm: 5.0
+  ic_split: true        # IC-based (not time-based) train/val/test split
+  train_frac: 0.70
+  val_frac: 0.10
+  test_frac: 0.20
+  default_seeds: [42, 123, 7]
+
+# Convergence screen: runs with test MSE ≥ threshold are excluded
+convergence_threshold: 0.95
+
+# ─────────────────────────────────────────────────────────
+# Model hyperparameters (frozen after pilot on K=0.5, ρ=0.30, N=8)
+# ─────────────────────────────────────────────────────────
+models:
+  dlinear:
+    lr: 3.0e-4
+    individual: false
+
+  tcn:
+    lr: 3.0e-4
+    num_channels: [64, 64, 64]
+    kernel_size: 3
+    dropout: 0.1
+
+  lstm:
+    lr: 3.0e-4
+    hidden_size: 128
+    num_layers: 2
+    dropout: 0.1
+
+  nbeats:
+    lr: 3.0e-4
+    num_stacks: 4
+    num_blocks_per_stack: 2
+    hidden_units: 64
+
+  patchtst:
+    lr: 3.0e-4
+    d_model: 64
+    n_heads: 4
+    d_ff: 256
+    dropout: 0.1
+    patch_len: 8
+    stride: 4
+
+  itransformer:
+    lr: 3.0e-4
+    d_model: 64
+    n_heads: 4
+    d_ff: 256
+    dropout: 0.1
+
+  dsformer:
+    lr: 3.0e-4
+    d_model: 64
+    n_heads: 4
+    dropout: 0.1
+
+  stid:
+    lr: 3.0e-4
+    hidden_dim: 64
+    num_layers: 3
+
+  oracle_gcn:
+    lr: 3.0e-4
+    hidden_dim: 64
+    num_layers: 3
+    # Uses ground-truth adjacency; diagnostic only
+
+  agcrn:
+    lr: 3.0e-3
+    hidden_dim: 32
+    num_layers: 2
+    cheb_k: 3
+    embed_dim: 10
+
+  graph_wavenet:
+    lr: 3.0e-4
+    residual_channels: 32
+    dilation_channels: 32
+    skip_channels: 64
+    end_channels: 128
+    blocks: 4
+    layers: 2
+    adaptive_adj: true
+
+  d2stgnn:
+    lr: 3.0e-3
+    hidden_dim: 32
+    num_layers: 2
+    k_diffusion: 3
+
+  staeformer:
+    lr: 3.0e-4
+    d_model: 64
+    n_heads: 4
+    d_ff: 256
+    dropout: 0.1
+    patch_len: 8
+
+# ─────────────────────────────────────────────────────────
+# LR overrides for specific models
+# ─────────────────────────────────────────────────────────
+lr_overrides:
+  agcrn: 3.0e-3
+  d2stgnn: 3.0e-3
+
+# ─────────────────────────────────────────────────────────
+# Sweep tiers
+# ─────────────────────────────────────────────────────────
+sweep_tiers:
+  test:
+    description: "Quick sanity check — one model, one config, one seed (~10 min GPU)"
+    models: [graph_wavenet]
+    K_values: [2.0]
+    rho_values: [0.20]
+    N_values: [8]
+    seeds: [42]
+
+  medium:
+    description: "Single-K slice — all ρ and N, 3 seeds (~2 GPU-hours)"
+    models: [graph_wavenet]
+    K_values: [2.0]
+    rho_values: [0.05, 0.075, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50]
+    N_values: [8, 16, 32]
+    seeds: [42, 123, 7]
+
+  full:
+    description: "Full benchmark — 13 models × 96 configs × 3 seeds (~4500 GPU-hours)"
+    models:
+      - dlinear
+      - tcn
+      - lstm
+      - nbeats
+      - patchtst
+      - itransformer
+      - dsformer
+      - stid
+      - oracle_gcn
+      - agcrn
+      - graph_wavenet
+      - d2stgnn
+      - staeformer
+    K_values: [0.5, 0.97, 2.0, 6.5]
+    rho_values: [0.05, 0.075, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50]
+    N_values: [8, 16, 32]
+    seeds: [42, 123, 7]
